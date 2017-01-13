@@ -35,6 +35,10 @@ switch (command) {
   case "do-what-it-says":
     doThis();
     break;
+
+  default:
+  	throw "ERROR! Invalid command--check your spelling!";
+  	break;
 }
 
 function tweetThis(){
@@ -46,7 +50,6 @@ function tweetThis(){
 }
 
 function spotifyThis(entry){
-	console.log(entry);
 	spotify.search({ type: 'track', query: entry }, function(err, data) {
 	  if ( err ) {
 	      console.log('Error occurred: ' + err);
@@ -76,8 +79,6 @@ function movieThis(entry){
 	  // If the request is successful (i.e. if the response status code is 200)
 	  if (!error && response.statusCode === 200) {
 
-	    // Parse the body of the site and recover just the imdbRating
-	    // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
 	    console.log("\n" +
 	    	"Title: " + JSON.parse(body).Title + "\n" + 						// Title of the movie.
 	    	"Year: " + JSON.parse(body).Year + "\n" +								// Year the movie came out.
