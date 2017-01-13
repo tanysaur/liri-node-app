@@ -1,13 +1,14 @@
+// fs is an NPM package for reading and writing files
 var fs = require("fs");
 
 var command = process.argv[2];
-var entry = process.argv[3];
+var entry = process.argv.splice(3).join("-");
 
 // Twitter
 var keys = require("./keys.js");
 var Twitter = require('twitter');
 var client = new Twitter({keys}); 
-var params = {screen_name: 'nodejs'};
+var params = {screen_name: 'tanysaur'};
 
 // Spotify
 var spotify = require('spotify');
@@ -20,7 +21,7 @@ var request = require("request");
 
 switch (command) {
   case "my-tweets":
-    tweetThis(entry);
+    tweetThis();
     break;
 
   case "spotify-this-song":
@@ -32,11 +33,11 @@ switch (command) {
     break;
 
   case "do-what-it-says":
-    doThis(entry);
+    doThis();
     break;
 }
 
-function tweetThis(entry){
+function tweetThis(){
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
 	  if (!error) {
 	    console.log(tweets);
@@ -45,6 +46,7 @@ function tweetThis(entry){
 }
 
 function spotifyThis(entry){
+	console.log(entry);
 	spotify.search({ type: 'track', query: entry }, function(err, data) {
 	  if ( err ) {
 	      console.log('Error occurred: ' + err);
@@ -93,7 +95,7 @@ function movieThis(entry){
 }
 
 
-function doThis(entry){
+function doThis(){
 	fs.readFile("random.txt", "utf8", function(error, data) {
 
 	  // We will then print the contents of data
@@ -109,37 +111,3 @@ function doThis(entry){
 	});
 }
 
-
-// // fs is an NPM package for reading and writing files
-// var fs = require("fs");
-
-
-// // This block of code will create a file called "random.txt".
-// // It will then print "Inception, Die Hard" in the file
-// fs.writeFile("random.txt", command, function(err) {
-
-//   // If the code experiences any errors it will log the error to the console.
-//   if (err) {
-//     return console.log(err);
-//   }
-
-//   // Otherwise, it will print: "random.txt was updated!"
-//   console.log("random.txt was updated!");
-
-// });
-
-// // This block of code will read from the "random.txt" file.
-// // It's important to include the "utf8" parameter or the code will provide stream data (garbage)
-// // The code will store the contents of the reading inside the variable "data"
-// fs.readFile("random.txt", "utf8", function(error, data) {
-
-//   // We will then print the contents of data
-//   console.log(data);
-
-//   // Then split it by commas (to make it more readable)
-//   var dataArr = data.split(",");
-
-//   // We will then re-display the content as an array for later use.
-//   console.log(dataArr);
-
-// });
