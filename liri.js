@@ -18,7 +18,6 @@ var spotify = require('spotify');
 // Include the request npm package (Don't forget to run "npm install request" in this folder first!)
 var request = require("request");
 
-
 switch (command) {
   case "my-tweets":
     tweetThis();
@@ -33,7 +32,7 @@ switch (command) {
     break;
 
   case "do-what-it-says":
-    doThis();
+    doThis(entry);
     break;
 
   default:
@@ -52,17 +51,25 @@ function tweetThis(){
 function spotifyThis(entry){
 	spotify.search({ type: 'track', query: entry }, function(err, data) {
 	  if ( err ) {
-	      console.log('Error occurred: ' + err);
-	      return;
+      console.log('Error occurred: ' + err);
+      
+      return;
 	  }
  		
- 		for(i = 0; i < 20; i++){
- 			console.log("\n" +
- 			"Artist(s): " + data.tracks.items[i].artists[0].name + "\n" +		// Artist(s)
-			"Song name: " + data.tracks.items[i].name + "\n" +																	// The song's name
-			"Preview link: " + data.tracks.items[i].preview_url + "\n" +		// A preview link of the song from Spotify
-			"Album: " + data.tracks.items[i].name + "\n" 										// The album that the song is from
- 			);
+ 		if(!data){
+ 			console.log("\n" + "Here's 'The Sign' by Ace of Base"
+	      	);
+ 		}
+
+ 		else{
+	 		for(i = 0; i < 20; i++){
+	 			console.log("\n" +
+	 			"Artist(s): " + data.tracks.items[i].artists[0].name + "\n" +		// Artist(s)
+				"Song name: " + data.tracks.items[i].name + "\n" +																	// The song's name
+				"Preview link: " + data.tracks.items[i].preview_url + "\n" +		// A preview link of the song from Spotify
+				"Album: " + data.tracks.items[i].name + "\n" 										// The album that the song is from
+	 			);
+	 		}
  		}
 
 
@@ -96,18 +103,23 @@ function movieThis(entry){
 }
 
 
-function doThis(){
-	fs.readFile("random.txt", "utf8", function(error, data) {
+function doThis(entry){
+	fs.readFile(entry, "utf8", function(error, data) {
 
 	  // We will then print the contents of data
 	  console.log(data);
 
 	  // Then split it by commas (to make it more readable)
-	  var dataArr = data.split(",");
+	  var dataArray = data.split(",");
 
 	  // We will then re-display the content as an array for later use.
-	  console.log(dataArr[0]);
-	  console.log(dataArr[1]);
+	  console.log(dataArray[0]);
+	  console.log(dataArray[1]);
+
+	  command = dataArray[0];
+	  entry = dataArray[1];
+
+
 
 	});
 }
