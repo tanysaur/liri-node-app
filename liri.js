@@ -1,13 +1,19 @@
-// fs is an NPM package for reading and writing files
 var fs = require("fs");
 
 var command = process.argv[2];
-var entry = process.argv.splice(3).join("-");
+var entry = process.argv[3];
 
 // Twitter
 var keys = require("./keys.js");
 var Twitter = require('twitter');
-var client = new Twitter({keys}); 
+var client = new Twitter({
+	consumer_key: keys.twitterKeys.consumer_key,
+  consumer_secret: keys.twitterKeys.consumer_secret,
+  access_token_key: keys.twitterKeys.access_token_key,
+  access_token_secret: keys.twitterKeys.access_token_secret,
+
+}); 
+
 var params = {screen_name: 'tanysaur'};
 
 // Spotify
@@ -18,9 +24,10 @@ var spotify = require('spotify');
 // Include the request npm package (Don't forget to run "npm install request" in this folder first!)
 var request = require("request");
 
+
 switch (command) {
   case "my-tweets":
-    tweetThis();
+    tweetThis(entry);
     break;
 
   case "spotify-this-song":
@@ -34,48 +41,47 @@ switch (command) {
   case "do-what-it-says":
     doThis(entry);
     break;
-
-  default:
-  	throw "ERROR! Invalid command--check your spelling!";
-  	break;
 }
 
-function tweetThis(){
+function tweetThis(entry){
+	
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
-	  if (!error) {
-	    console.log(tweets);
+	  if (error) {
+	    console.log(error);
 	  }
+	  else{
+	  	for(i = 0; i < tweets.length; i++){
+	  		console.log("===========================" + "\n" +
+	  			tweets[i].user.screen_name + ": " + tweets[i].text + "\n" +
+	  			tweets[i].user.created_at + "\n"
+	  			);
+	  	}
+		}
 	});
 }
 
 function spotifyThis(entry){
 	spotify.search({ type: 'track', query: entry }, function(err, data) {
 	  if ( err ) {
-      console.log('Error occurred: ' + err);
-      
-      return;
+	      console.log('Error occurred: ' + err);
+	      return;
 	  }
  		
- 		if(!data){
- 			console.log("\n" + "Here's 'The Sign' by Ace of Base"
-	      	);
- 		}
-
- 		else{
-	 		for(i = 0; i < 20; i++){
-	 			console.log("\n" +
-	 			"Artist(s): " + data.tracks.items[i].artists[0].name + "\n" +		// Artist(s)
-				"Song name: " + data.tracks.items[i].name + "\n" +																	// The song's name
-				"Preview link: " + data.tracks.items[i].preview_url + "\n" +		// A preview link of the song from Spotify
-				"Album: " + data.tracks.items[i].name + "\n" 										// The album that the song is from
-	 			);
-	 		}
+ 		for(i = 0; i < data.length; i++){
+ 			console.log("\n" +
+ 			"Artist(s): " + data.tracks.items[i].artists[0].name + "\n" +		// Artist(s)
+			"Song name: " + data.tracks.items[i].name + "\n" +							// The song's name
+			"Preview link: " + data.tracks.items[i].preview_url + "\n" +		// A preview link of the song from Spotify
+			"Album: " + data.tracks.items[i].name + "\n" 										// The album that the song is from
+ 			);
  		}
 
 
 // if no song is provided then your program will default to
 // "The Sign" by Ace of Base
 	});
+
+console.log("spotify");
 }
 
 function movieThis(entry){
@@ -86,7 +92,9 @@ function movieThis(entry){
 	  // If the request is successful (i.e. if the response status code is 200)
 	  if (!error && response.statusCode === 200) {
 
-	    console.log("\n" +
+	    // Parse the body of the site and recover just the imdbRating
+	    // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
+	    console.log("===========================" + "\n" +
 	    	"Title: " + JSON.parse(body).Title + "\n" + 						// Title of the movie.
 	    	"Year: " + JSON.parse(body).Year + "\n" +								// Year the movie came out.
 	    	"IMBD Rating: " + JSON.parse(body).imdbRating + "\n" +	// IMDB Rating of the movie.
@@ -104,23 +112,17 @@ function movieThis(entry){
 
 
 function doThis(entry){
-	fs.readFile(entry, "utf8", function(error, data) {
+	fs.readFile("random.txt", "utf8", function(error, data) {
 
 	  // We will then print the contents of data
 	  console.log(data);
 
 	  // Then split it by commas (to make it more readable)
-	  var dataArray = data.split(",");
+	  var dataArr = data.split(",");
 
 	  // We will then re-display the content as an array for later use.
-	  console.log(dataArray[0]);
-	  console.log(dataArray[1]);
-
-	  command = dataArray[0];
-	  entry = dataArray[1];
-
-
+	  console.log(dataArr[0]);
+	  console.log(dataArr[1]);
 
 	});
 }
-
