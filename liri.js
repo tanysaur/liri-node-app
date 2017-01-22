@@ -22,29 +22,8 @@ var spotify = require('spotify');
 // OMBD variables
 var request = require("request");
 
-// Pushes the commands entered by the user
+// Initiates the user entry and pushes the commands entered by the user
 runCommand(command, entry);
-
-// This will write the command + entry on the log.txt file and doThis will read any commands written except for "do-what-it-says"
-// if(command != "do-what-it-says"){
-// 	// It will print the command & entry in the file random.txt
-// 	fs.writeFile("random.txt", command + "," + entry, function(error) {
-
-// 	  // If the code experiences any errors it will log the error to the console.
-// 	  if (error) {
-// 	    return console.log(err);
-// 	  }
-// 	  // Otherwise, it will print: "random.txt was updated!"
-// 	  console.log("random.txt was updated! \n");
-
-// 	  runCommand(command, entry);
-// 	});
-
-// 	// Bypass writing the command and entry for do-what-it-says command
-// }else{
-// 	doThis();
-// }
-
 
 // Switch statement that picks the command the user entered
 function runCommand(command, entry){
@@ -92,23 +71,29 @@ function spotifyThis(entry){
 	
 	// console.log("SPOTIFY: " + entry);
 	
-	// If there was no song provided, the console will push info 'I saw the sign' by Ace of Base
+	// If there was no song provided, the console will push track info of "The Sign" by Ace of Base
 	if (entry == "") {
-		console.log("I SAW THE SIGN");
-	// 	spotify.lookup({type: 'track', id: '3AkdHnSTgdBY8FeRCzjfHN'}, function(error, data) { 
-	// 		// spotify.get('I saw the sign', function(error, data) {
-	// 			console.log(data);
-	// 		if (error){
-	// 			console.log("An error occured: " + error);
-	// 			return;
-	// 		} 
-	// 	});
+		spotify.search({ type: 'track', query: 'The Sign by Ace of Base' }, function(error, data) {
+
+			// Throw error in the console if it occurs
+			if (error){
+				console.log("An error occured: " + error);
+			}
+
+ 			console.log("==========================================================" + "\n \n" +
+ 			"Artist(s): " + data.tracks.items[0].artists[0].name + "\n" +		// Artist(s)
+			"Song name: " + data.tracks.items[0].name + "\n" +							// The song's name
+			"Preview link: " + data.tracks.items[0].preview_url + "\n" +		// A preview link of the song from Spotify
+			"Album: " + data.tracks.items[0].name + "\n" 										// The album that the song is from
+ 			);
+		});
  	}	
 
  	// If track is valid, API will log first 10 tracks' info regarding the entry provided by user
 	else{
 		spotify.search({ type: 'track', query: entry }, function(error, data) {
 
+			// Throw error in the console if it occurs
 			if (error){
 				console.log("An error occured: " + error);
 			}
@@ -128,15 +113,39 @@ function spotifyThis(entry){
 
 // Function that calls the ODBM API that will provided information about the movies entered by user
 function movieThis(entry){
-	
-	// Then run a request to the OMDB API with the movie specified
-	request("http://www.omdbapi.com/?t=" + entry + "&y=&plot=short&tomatoes=true&r=json", function(error, response, body) {
+
+	// If the user does not enter a movie title, it will default to show OMDB info about the movie: Mr. Nobody
+	if(entry == ""){
+		request("http://www.omdbapi.com/?t=mr-nobody&y=&plot=short&tomatoes=true&r=json", function(error, response, body) {
+
+		// Throw error in the console if it occurs
+		if (error){
+			console.log("An error occured: " + error);
+		}
+
+		console.log("\n" + "==========================================================" + "\n \n" +
+  	"Title: " + JSON.parse(body).Title + "\n" + 						// Title of the movie.
+  	"Year: " + JSON.parse(body).Year + "\n" +								// Year the movie came out.
+  	"IMBD Rating: " + JSON.parse(body).imdbRating + "\n" +	// IMDB Rating of the movie.
+  	"Country: " + JSON.parse(body).Country + "\n" +					// Country where the movie was produced.
+  	"Language: " + JSON.parse(body).Language + "\n" +				// Language of the movie.
+  	"Plot: " + JSON.parse(body).Plot + "\n" +								// Plot of the movie.
+  	"Actors: " + JSON.parse(body).Actors + "\n" +						// Actors in the movie.
+  	"Rotten Tomatoes rating: " + JSON.parse(body).tomatoUserRating + "\n" +		// Rotten Tomatoes Rating.
+  	"Rotten Tomatoes URL: " + JSON.parse(body).tomatoURL + "\n"								// Rotten Tomatoes URL.
+  	);
+	})
+	}else{
+		// Otherwise, it will then run a request to the OMDB API with the movie specified
+		request("http://www.omdbapi.com/?t=" + entry + "&y=&plot=short&tomatoes=true&r=json", function(error, response, body) {
+
+		// Throw error in the console if it occurs
+		if (error){
+			console.log("An error occured: " + error);
+		}
 
 	  // If the request is successful (i.e. if the response status code is 200)
-	  if (!error && response.statusCode === 200) {
-
-	    // Parse the body of the site and recover just the imdbRating
-	    // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
+	  else if (!error && response.statusCode === 200) {
 	    console.log("\n" + "==========================================================" + "\n \n" +
 	    	"Title: " + JSON.parse(body).Title + "\n" + 						// Title of the movie.
 	    	"Year: " + JSON.parse(body).Year + "\n" +								// Year the movie came out.
@@ -148,13 +157,15 @@ function movieThis(entry){
 	    	"Rotten Tomatoes rating: " + JSON.parse(body).tomatoUserRating + "\n" +		// Rotten Tomatoes Rating.
 	    	"Rotten Tomatoes URL: " + JSON.parse(body).tomatoURL + "\n"								// Rotten Tomatoes URL.
 	    	);
-	  }
-	});
+		  }
+		});
+	}
 }
 
 // Runs when command 'do-what-it-says' is typed by the user
 function doThis(){
 	fs.readFile("random.txt", "utf8", function(error, data) {
+		
 		// If error occurs, print error
 		if (error){
 			console.log("Error: " + error);
